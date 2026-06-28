@@ -7,7 +7,7 @@ import { PortInfo } from "@serialport/bindings-interface"
 import { WakeLock } from "wake-lock";
 import WebSocket from "ws";
 import { SerialPortSerialPort } from "./serialport-serialport";
-import { EBB } from "./ebb";
+import { GRBL } from "./grbl";
 import { Device, PenMotion, Motion, Plan } from "./planning";
 import { formatDuration } from "./util";
 import { autoDetect } from '@serialport/bindings-cpp';
@@ -24,7 +24,7 @@ export function startServer(port: number, device: string | null = null, enableCo
   const server = http.createServer(app);
   const wss = new WebSocket.Server({ server });
 
-  let ebb: EBB | null;
+  let ebb: GRBL | null;
   let clients: WebSocket[] = [];
   let cancelRequested = false;
   let unpaused: Promise<void> | null = null;
@@ -292,7 +292,7 @@ async function* ebbs(path?: string) {
       const closed = new Promise((resolve) => {
         port.addEventListener('disconnect', resolve, { once: true })
       });
-      yield new EBB(port);
+      yield new GRBL(port);
       await closed;
       yield null;
       console.error(`Lost connection to GRBL device, reconnecting...`);
@@ -304,15 +304,15 @@ async function* ebbs(path?: string) {
   }
 }
 
-export async function connectGRBL(path: string | undefined): Promise<EBB | null> {
+export async function connectGRBL(path: string | undefined): Promise<GRBL | null> {
   if (path) {
     const port = await tryOpen(path);
-    return new EBB(port);
+    return new GRBL(port);
   } else {
     const ports = await listGRBLPorts();
     if (ports.length) {
       const port = await tryOpen(ports[0]);
-      return new EBB(port);
+      return new GRBL(port);
     } else {
       return null;
     }
