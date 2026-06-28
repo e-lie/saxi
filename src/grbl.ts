@@ -94,10 +94,14 @@ export class GRBL {
   }
 
   /** No-op — only called when supportsSR() is true. */
-  public async setServoPowerTimeout(_timeout: number, _power?: boolean): Promise<void> {}
+  public setServoPowerTimeout(_timeout: number, _power?: boolean): Promise<void> {
+    return Promise.resolve();
+  }
 
-  /** Stub — implemented in step 5 (pen control via Z axis or spindle). */
-  public async setPenHeight(_height: number, _rate: number, _delay = 0): Promise<void> {}
+  /** No-op — pen control is handled via executePenMotion (M3/M5). */
+  public setPenHeight(_height: number, _rate: number, _delay = 0): Promise<void> {
+    return Promise.resolve();
+  }
 
   /** Wait for all buffered motion to complete by sending a zero-dwell G4. */
   public async waitUntilMotorsIdle(): Promise<void> {
