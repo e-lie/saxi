@@ -241,7 +241,7 @@ export function startServer(port: number, device: string | null = null, enableCo
 
 async function tryOpen(path: string): Promise<SerialPort> {
   const port = new SerialPortSerialPort(path);
-  await port.open({baudRate: 9600})
+  await port.open({baudRate: 115200})
   return port
 }
 
