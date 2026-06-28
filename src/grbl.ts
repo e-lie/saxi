@@ -120,8 +120,16 @@ export class GRBL {
     }
   }
 
-  // TODO step 4: G0/G1 movements
-  private async executeXYMotion(_plan: XYMotion): Promise<void> {}
+  private async executeXYMotion(motion: XYMotion): Promise<void> {
+    for (const block of motion.blocks) {
+      const vMax = Math.max(block.vInitial, block.vFinal);
+      if (vMax === 0) continue;
+      const feedRate = Math.round(vMax * 60); // mm/s → mm/min
+      const x = block.p2.x.toFixed(3);
+      const y = block.p2.y.toFixed(3);
+      await this.command(`G1 X${x} Y${y} F${feedRate}`);
+    }
+  }
 
   // TODO step 5: M3/M5 or Z axis
   private async executePenMotion(_pm: PenMotion): Promise<void> {}
