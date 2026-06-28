@@ -249,23 +249,36 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function isEBB(p: PortInfo): boolean {
-  return p.manufacturer === "SchmalzHaus" || p.manufacturer === "SchmalzHaus LLC" || (p.vendorId == "04D8" && p.productId == "FD92");
+// Known USB-serial chips used on GRBL boards (CH340, FTDI, CP2102, Arduino Uno)
+const GRBL_VID_PID = [
+  { vendorId: "1a86", productId: "7523" }, // CH340 (most Arduino clones)
+  { vendorId: "0403", productId: "6001" }, // FTDI FT232RL (genuine Arduino, CNC shields)
+  { vendorId: "10c4", productId: "ea60" }, // CP2102 (many CNC boards)
+  { vendorId: "2341", productId: "0043" }, // Arduino Uno R3 (ATmega16U2)
+];
+
+function isGRBL(p: PortInfo): boolean {
+  return GRBL_VID_PID.some(
+    ({ vendorId, productId }) =>
+      p.vendorId?.toLowerCase() === vendorId &&
+      p.productId?.toLowerCase() === productId
+  );
 }
 
-async function listEBBs() {
-  const Binding = autoDetect()
+async function listGRBLPorts() {
+  const Binding = autoDetect();
   const ports = await Binding.list();
-  return ports.filter(isEBB).map((p: { path: any; }) => p.path);
+  return ports.filter(isGRBL).map((p: { path: any }) => p.path);
 }
 
-async function waitForEbb() {
-// eslint-disable-next-line no-constant-condition
+async function waitForGRBL() {
+  // eslint-disable-next-line no-constant-condition
   while (true) {
-    const ebbs = await listEBBs();
-    if (ebbs.length) {
-      return ebbs[0];
+    const ports = await listGRBLPorts();
+    if (ports.length) {
+      return ports[0];
     }
+    console.log("No GRBL device found, retrying in 5 seconds...");
     await sleep(5000);
   }
 }
@@ -273,8 +286,8 @@ async function waitForEbb() {
 async function* ebbs(path?: string) {
   while (true) {
     try {
-      const com = path || (await waitForEbb());
-      console.log(`Found EBB at ${com}`);
+      const com = path || (await waitForGRBL());
+      console.log(`Found GRBL device at ${com}`);
       const port = await tryOpen(com);
       const closed = new Promise((resolve) => {
         port.addEventListener('disconnect', resolve, { once: true })
@@ -282,23 +295,23 @@ async function* ebbs(path?: string) {
       yield new EBB(port);
       await closed;
       yield null;
-      console.error(`Lost connection to EBB, reconnecting...`);
+      console.error(`Lost connection to GRBL device, reconnecting...`);
     } catch (e) {
-      console.error(`Error connecting to EBB: ${e.message}`);
+      console.error(`Error connecting to GRBL device: ${e.message}`);
       console.error(`Retrying in 5 seconds...`);
       await sleep(5000);
     }
   }
 }
 
-export async function connectEBB(path: string | undefined): Promise<EBB | null> {
+export async function connectGRBL(path: string | undefined): Promise<EBB | null> {
   if (path) {
     const port = await tryOpen(path);
     return new EBB(port);
   } else {
-    const ebbs = await listEBBs();
-    if (ebbs.length) {
-      const port = await tryOpen(ebbs[0]);
+    const ports = await listGRBLPorts();
+    if (ports.length) {
+      const port = await tryOpen(ports[0]);
       return new EBB(port);
     } else {
       return null;

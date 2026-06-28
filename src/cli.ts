@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import {connectEBB, startServer} from "./server";
+import {connectGRBL, startServer} from "./server";
 import {replan} from "./massager";
 import {Window} from "svgdom";
 import * as fs from "fs";
@@ -45,9 +45,9 @@ export function cli(argv: string[]): void {
         }),
       args => {
         if (args["firmware-version"]) {
-          connectEBB(args.device).then(async (ebb) => {
+          connectGRBL(args.device).then(async (ebb) => {
             if (!ebb) {
-              console.error(`No EBB connected`);
+              console.error(`No GRBL device connected`);
               return process.exit(1);
             }
             const fwv = await ebb.firmwareVersion();
@@ -234,7 +234,7 @@ export function cli(argv: string[]): void {
         const p = replan(linesToVecs(lines), planOptions)
         console.log(`${p.motions.length} motions, estimated duration: ${formatDuration(p.duration())}`)
         console.log("connecting to plotter...")
-        const ebb = await connectEBB(args.device)
+        const ebb = await connectGRBL(args.device)
         if (!ebb) {
           console.error("Couldn't connect to device!")
           process.exit(1)
