@@ -131,8 +131,13 @@ export class GRBL {
     }
   }
 
-  // TODO step 5: M3/M5 or Z axis
-  private async executePenMotion(_pm: PenMotion): Promise<void> {}
+  private async executePenMotion(pm: PenMotion): Promise<void> {
+    if (pm.isUp) {
+      await this.command('M5');      // spindle off = pen up
+    } else {
+      await this.command('M3 S50'); // spindle on = pen down
+    }
+  }
 
   public async executePlan(plan: Plan): Promise<void> {
     await this.enableMotors();

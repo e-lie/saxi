@@ -178,17 +178,19 @@ export interface Motion {
 
 export class PenMotion implements Motion {
   public static deserialize(o: any): PenMotion {
-    return new PenMotion(o.initialPos, o.finalPos, o.duration);
+    return new PenMotion(o.initialPos, o.finalPos, o.duration, o.isUp);
   }
 
   public initialPos: number;
   public finalPos: number;
   public pDuration: number;
+  public isUp: boolean;
 
-  public constructor(initialPos: number, finalPos: number, duration: number) {
+  public constructor(initialPos: number, finalPos: number, duration: number, isUp: boolean) {
     this.initialPos = initialPos;
     this.finalPos = finalPos;
     this.pDuration = duration;
+    this.isUp = isUp;
   }
 
   public duration(): number {
@@ -201,6 +203,7 @@ export class PenMotion implements Motion {
       initialPos: this.initialPos,
       finalPos: this.finalPos,
       duration: this.pDuration,
+      isUp: this.isUp,
     };
   }
 }
@@ -292,13 +295,13 @@ export class Plan {
         // pen-up/pen-down heights in a single place and reference them from
         // the PenMotions. Then we can change them in just one place.
         if (j === this.motions.length - 3) {
-          return new PenMotion(penDownHeight, Device.Axidraw.penPctToPos(0), motion.duration());
+          return new PenMotion(penDownHeight, Device.Axidraw.penPctToPos(0), motion.duration(), true);
         } else if (j === this.motions.length - 1) {
-          return new PenMotion(Device.Axidraw.penPctToPos(0), penUpHeight, motion.duration());
+          return new PenMotion(Device.Axidraw.penPctToPos(0), penUpHeight, motion.duration(), true);
         }
         return (penMotionIndex++ % 2 === 0
-          ? new PenMotion(penUpHeight, penDownHeight, motion.duration())
-          : new PenMotion(penDownHeight, penUpHeight, motion.duration()));
+          ? new PenMotion(penUpHeight, penDownHeight, motion.duration(), false)
+          : new PenMotion(penDownHeight, penUpHeight, motion.duration(), true));
       }
     }));
   }
@@ -571,14 +574,14 @@ export function plan(
     const penUpPos = i === paths.length - 1 ? Device.Axidraw.penPctToPos(penMaxUpPos) : profile.penUpPos;
     motions.push(
       constantAccelerationPlan([curPos, m.p1], profile.penUpProfile),
-      new PenMotion(profile.penUpPos, profile.penDownPos, profile.penDropDuration),
+      new PenMotion(profile.penUpPos, profile.penDownPos, profile.penDropDuration, false),
       m,
-      new PenMotion(profile.penDownPos, penUpPos, profile.penLiftDuration)
+      new PenMotion(profile.penDownPos, penUpPos, profile.penLiftDuration, true)
     );
     curPos = m.p2;
   });
   // finally, move back to (0, 0).
   motions.push(constantAccelerationPlan([curPos, {x: 0, y: 0}], profile.penUpProfile));
-  motions.push(new PenMotion(Device.Axidraw.penPctToPos(penMaxUpPos), profile.penUpPos, profile.penDropDuration));
+  motions.push(new PenMotion(Device.Axidraw.penPctToPos(penMaxUpPos), profile.penUpPos, profile.penDropDuration, false));
   return new Plan(motions);
 }
