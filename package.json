@@ -29,7 +29,8 @@
     "deploy": "rimraf dist/ui && IS_WEB=1 webpack --mode=production && gh-pages -d dist/ui",
     "test": "jest",
     "test1": "node test1.js --device /dev/ttyUSB0",
-    "test2": "node test2.js --device /dev/ttyUSB0"
+    "test2": "node test2.js --device /dev/ttyUSB0",
+    "test3": "node test3.js --device /dev/ttyUSB0"
   },
   "author": "Jeremy Rose <nornagon@nornagon.net>",
   "license": "AGPL-3.0-only",
