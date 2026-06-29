@@ -14,13 +14,13 @@ const COMMANDS = [
   { cmd: 'G21',            label: 'mm mode' },
   { cmd: 'G90',            label: 'absolute coords' },
   { cmd: 'G92 X0 Y0',      label: 'set origin here' },
-  { cmd: 'M3',             label: 'PEN UP' },
+  { cmd: 'M3 S50',          label: 'PEN UP' },
   { cmd: 'G4 P0.5',        label: 'wait servo' },
   { cmd: 'M5',             label: 'PEN DOWN' },
   { cmd: 'G4 P0.5',        label: 'wait servo' },
   { cmd: 'G1 X0 Y30 F1000', label: 'draw 30mm right (Y=horizontal on this machine)' },
   { cmd: 'G4 P0.2',        label: 'dwell' },
-  { cmd: 'M3',             label: 'PEN UP' },
+  { cmd: 'M3 S50',          label: 'PEN UP' },
   { cmd: 'G1 X0 Y0 F3000', label: 'return home' },
   // NOTE: pen control via M3/M5 doesn't work — replace with correct command below
   // Try Z axis: G0 Z5 (up) / G0 Z0 (down)
