@@ -134,7 +134,7 @@ export class GRBL {
       if (vMax === 0) continue;
       const feedRate = Math.round(vMax * 60); // mm/s → mm/min
       const x = block.p2.x.toFixed(3);
-      const y = block.p2.y.toFixed(3);
+      const y = (-block.p2.y).toFixed(3); // SVG Y increases down, GRBL Y increases up
       await this.command(`G1 X${x} Y${y} F${feedRate}`);
     }
   }
