@@ -79,9 +79,12 @@ export class GRBL {
 
   /** Unlock alarm and set mm + absolute mode. `microsteppingMode` is ignored (GRBL uses firmware config). */
   public async enableMotors(_microsteppingMode?: number): Promise<void> {
-    await this.command('$X'); // unlock alarm
-    await this.command('G21'); // mm mode
-    await this.command('G90'); // absolute coordinates
+    await this.command('$X');        // unlock alarm
+    await this.command('M3');        // pen up before any move
+    await this.command('G90');       // absolute coordinates
+    await this.command('G21');       // mm mode
+    await this.command('$1=255');    // keep motors energized during plot
+    await this.command('G1 F4000'); // default feed rate mm/min
   }
 
   public async disableMotors(): Promise<void> {
@@ -137,9 +140,12 @@ export class GRBL {
 
   private async executePenMotion(pm: PenMotion): Promise<void> {
     if (pm.isUp) {
-      await this.command('M5');      // spindle off = pen up
+      await this.command('G4 P0.2'); // dwell before lift
+      await this.command('M3');      // pen up
+      await this.command('G4 P0.2'); // wait for servo to settle
     } else {
-      await this.command('M3 S50'); // spindle on = pen down
+      await this.command('M5');      // pen down
+      await this.command('G4 P0.5'); // wait for servo to settle before drawing
     }
   }
 
