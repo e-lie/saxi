@@ -32,18 +32,20 @@ export class GRBL {
 
           const pending = this.commandQueue.shift();
           if (!pending) {
-            console.log(`GRBL unexpected: ${line}`);
+            console.log(`GRBL unexpected (no pending cmd): "${line}"`);
             return;
           }
           if (line === 'ok') {
+            console.log(`GRBL < ok`);
             pending.resolve(pending.lines);
           } else if (line.startsWith('error:')) {
+            console.log(`GRBL < ${line}`);
             pending.reject(new Error(`GRBL ${line}`));
           } else if (line.startsWith('ALARM:')) {
+            console.log(`GRBL < ${line}`);
             pending.reject(new Error(`GRBL alarm: ${line}`));
           } else {
-            // Unknown line — log and resolve anyway so the queue doesn't stall
-            console.log(`GRBL unknown response: ${line}`);
+            console.log(`GRBL < unknown: "${line}" — resolving anyway`);
             pending.resolve(pending.lines);
           }
         }
@@ -60,6 +62,7 @@ export class GRBL {
 
   /** Send a G-code command and wait for the `ok` response. */
   public command(cmd: string): Promise<void> {
+    console.log(`GRBL > ${cmd}`);
     return new Promise((resolve, reject) => {
       this.commandQueue.push({ resolve: () => resolve(), reject, lines: [] });
       this.write(`${cmd}\n`);
