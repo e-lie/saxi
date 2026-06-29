@@ -17,7 +17,7 @@ import "./style.css";
 import pathJoinRadiusIcon from "./icons/path-joining radius.svg";
 import pointJoinRadiusIcon from "./icons/point-joining radius.svg";
 import rotateDrawingIcon from "./icons/rotate-drawing.svg";
-import { EBB } from "./ebb";
+import { GRBL } from "./grbl";
 
 const defaultVisualizationOptions = {
   penStrokeWidth: 0.5,
@@ -129,7 +129,7 @@ class WebSerialDriver implements Driver {
     // (pyserial defaults to 9600)
     await port.open({ baudRate: 9600 })
     const { usbVendorId, usbProductId } = port.getInfo()
-    return new WebSerialDriver(new EBB(port), `${usbVendorId.toString(16).padStart(4, '0')}:${usbProductId.toString(16).padStart(4, '0')}`)
+    return new WebSerialDriver(new GRBL(port), `${usbVendorId.toString(16).padStart(4, '0')}:${usbProductId.toString(16).padStart(4, '0')}`)
   }
 
   private _name: string
@@ -137,8 +137,8 @@ class WebSerialDriver implements Driver {
     return this._name
   }
 
-  private ebb: EBB
-  private constructor(ebb: EBB, name: string) {
+  private ebb: GRBL
+  private constructor(ebb: GRBL, name: string) {
     this.ebb = ebb
     this._name = name
   }
