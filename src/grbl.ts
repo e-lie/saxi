@@ -107,6 +107,14 @@ export class GRBL {
     return Promise.resolve();
   }
 
+  public async setPenUp(): Promise<void> {
+    await this.command('M3 S50');
+  }
+
+  public async setPenDown(): Promise<void> {
+    await this.command('M5');
+  }
+
   /** Wait for all buffered motion to complete by sending a zero-dwell G4. */
   public async waitUntilMotorsIdle(): Promise<void> {
     await this.command('G4 P0');

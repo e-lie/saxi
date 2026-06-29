@@ -99,6 +99,8 @@ interface Driver {
   pause(): void;
   resume(): void;
   setPenHeight(height: number, rate: number): void;
+  setPenUp(): void;
+  setPenDown(): void;
   limp(): void;
 
   name(): string;
@@ -201,6 +203,14 @@ class WebSerialDriver implements Driver {
       await this.ebb.setServoPowerTimeout(10000, true)
     }
     await this.ebb.setPenHeight(height, rate)
+  }
+
+  public async setPenUp(): Promise<void> {
+    await this.ebb.setPenUp();
+  }
+
+  public async setPenDown(): Promise<void> {
+    await this.ebb.setPenDown();
   }
 
   public limp(): void {
@@ -335,6 +345,9 @@ class SaxiDriver implements Driver {
     this.send({ c: "setPenHeight", p: {height, rate} });
   }
 
+  public setPenUp() { this.send({ c: "setPenUp" }); }
+  public setPenDown() { this.send({ c: "setPenDown" }); }
+
   public limp() { this.send({ c: "limp" }); }
   public ping() { this.send({ c: "ping" }); }
 }
@@ -423,14 +436,8 @@ function PenHeight({state, driver}: {state: State; driver: Driver}) {
   const dispatch = useContext(DispatchContext);
   const setPenUpHeight = (x: number) => dispatch({type: "SET_PLAN_OPTION", value: {penUpHeight: x}});
   const setPenDownHeight = (x: number) => dispatch({type: "SET_PLAN_OPTION", value: {penDownHeight: x}});
-  const penUp = () => {
-    const height = Device.Axidraw.penPctToPos(penUpHeight);
-    driver.setPenHeight(height, 1000);
-  };
-  const penDown = () => {
-    const height = Device.Axidraw.penPctToPos(penDownHeight);
-    driver.setPenHeight(height, 1000);
-  };
+  const penUp = () => driver.setPenUp();
+  const penDown = () => driver.setPenDown();
   return <Fragment>
     <div className="flex">
       <label className="pen-label">

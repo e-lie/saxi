@@ -54,6 +54,12 @@ export function startServer(port: number, device: string | null = null, enableCo
             })();
           }
           break;
+        case "setPenUp":
+          if (ebb) { ebb.setPenUp(); }
+          break;
+        case "setPenDown":
+          if (ebb) { ebb.setPenDown(); }
+          break;
       }
     });
 
