@@ -11,8 +11,8 @@ echo "Searching for Raspberry Pi on local network..."
 echo ""
 
 # --- Method 1: mDNS ---
-if ping -c1 -W2 raspberrypi.local &>/dev/null 2>&1; then
-    IP=$(ping -c1 -W2 raspberrypi.local 2>/dev/null | grep -oP '\(\K[0-9.]+')
+IP=$(getent hosts raspberrypi.local 2>/dev/null | awk '{print $1}' | head -1)
+if [ -n "$IP" ]; then
     echo "Found via mDNS: raspberrypi.local → $IP"
     echo ""
     echo "Saxi: http://$IP:9080"
