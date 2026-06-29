@@ -25,8 +25,10 @@ sudo usermod -a -G dialout "$USER"
 # --- Build ---
 echo "[3/4] Installing dependencies and building..."
 cd "$SAXI_DIR"
-npm install
-npx tsc && npx webpack --mode=production
+npm install --ignore-scripts   # skip prepare/preinstall hooks
+npx tsc --project tsconfig.json
+npx webpack --mode=production
+echo "      Build OK."
 
 # --- Systemd service ---
 echo "[4/4] Installing systemd service..."
