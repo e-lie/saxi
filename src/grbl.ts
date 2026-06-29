@@ -140,14 +140,17 @@ export class GRBL {
   }
 
   private async executeXYMotion(motion: XYMotion): Promise<void> {
+    // massager.ts converts paths from mm to steps (×stepsPerMm=5) before planning.
+    // Divide back to mm so GRBL receives correct coordinates.
+    const stepsPerMm = 5;
     for (const block of motion.blocks) {
       const vMax = Math.max(block.vInitial, block.vFinal);
       if (vMax === 0) continue;
-      const feedRate = Math.round(vMax * 60); // mm/s → mm/min
-      // GRBL X = machine vertical axis, GRBL Y = machine horizontal axis
-      // Saxi X = paper horizontal, Saxi Y = paper vertical → swap
-      const x = block.p2.y.toFixed(3);
-      const y = block.p2.x.toFixed(3);
+      // vMax is in steps/s → convert to mm/min for GRBL feed rate
+      const feedRate = Math.round((vMax / stepsPerMm) * 60);
+      // GRBL X = machine vertical, GRBL Y = machine horizontal (axes swapped vs saxi)
+      const x = (block.p2.y / stepsPerMm).toFixed(3);
+      const y = (block.p2.x / stepsPerMm).toFixed(3);
       await this.command(`G1 X${x} Y${y} F${feedRate}`);
     }
   }

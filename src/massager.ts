@@ -47,6 +47,16 @@ export function replan(inPaths: Vec2[][], planOptions: PlanOptions): Plan {
     }
   }
 
+  // Debug: log bounds after scaling (should be in mm, within paper margins)
+  {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const pl of paths) for (const p of pl) {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    }
+    console.log(`[replan] after scale bbox: X[${minX.toFixed(1)}, ${maxX.toFixed(1)}] Y[${minY.toFixed(1)}, ${maxY.toFixed(1)}]`);
+  }
+
   // Rescaling loses the stroke info, so refer back to the original paths to
   // filter based on the stroke. Rescaling doesn't change the number or order
   // of the paths.
