@@ -11,7 +11,7 @@ echo "Searching for Raspberry Pi on local network..."
 echo ""
 
 # --- Method 1: mDNS ---
-IP=$(getent hosts raspberrypi.local 2>/dev/null | awk '{print $1}' | head -1)
+IP=$(getent ahostsv4 raspberrypi.local 2>/dev/null | awk '{print $1}' | head -1)
 if [ -n "$IP" ]; then
     echo "Found via mDNS: raspberrypi.local → $IP"
     echo ""
