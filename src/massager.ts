@@ -13,6 +13,17 @@ const mmPerSvgUnit = mmPerInch / svgUnitsPerInch
 export function replan(inPaths: Vec2[][], planOptions: PlanOptions): Plan {
   let paths = inPaths;
 
+  // Debug: log paper size and raw path bounds
+  {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const pl of inPaths) for (const p of pl) {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    }
+    console.log(`[replan] paperSize=${JSON.stringify(planOptions.paperSize.size)} margin=${planOptions.marginMm} fitPage=${planOptions.fitPage}`);
+    console.log(`[replan] raw paths bbox: X[${minX.toFixed(1)}, ${maxX.toFixed(1)}] Y[${minY.toFixed(1)}, ${maxY.toFixed(1)}]`);
+  }
+
   // Rotate drawing around center of paper to handle plotting portrait drawings
   // along y-axis of plotter
   // Rotate around the center of the page, but in SvgUnits (not mm)
