@@ -1,0 +1,15 @@
+[Unit]
+Description=Saxi GRBL Plotter Server
+After=network.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__SAXI_DIR__
+ExecStart=/usr/bin/node cli.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
