@@ -129,6 +129,8 @@ export class GRBL {
     return lines.join(' ') || 'GRBL (unknown version)';
   }
 
+  public cancelRequested = false;
+
   public async executeMotion(m: Motion): Promise<void> {
     if (m instanceof XYMotion) {
       await this.executeXYMotion(m);
@@ -144,6 +146,7 @@ export class GRBL {
     // Divide back to mm so GRBL receives correct coordinates.
     const stepsPerMm = 5;
     for (const block of motion.blocks) {
+      if (this.cancelRequested) return;
       const vMax = Math.max(block.vInitial, block.vFinal);
       if (vMax === 0) continue;
       // vMax is in steps/s → convert to mm/min for GRBL feed rate

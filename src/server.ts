@@ -8,7 +8,7 @@ import { WakeLock } from "wake-lock";
 import WebSocket from "ws";
 import { SerialPortSerialPort } from "./serialport-serialport";
 import { GRBL } from "./grbl";
-import { Device, PenMotion, Motion, Plan } from "./planning";
+import { PenMotion, Motion, Plan } from "./planning";
 import { formatDuration } from "./util";
 import { autoDetect } from '@serialport/bindings-cpp';
 
@@ -117,6 +117,7 @@ export function startServer(port: number, device: string | null = null, enableCo
 
   app.post("/cancel", (req, res) => {
     cancelRequested = true;
+    if (ebb) { ebb.cancelRequested = true; }
     if (unpaused) {
       signalUnpause();
     }
@@ -168,7 +169,7 @@ export function startServer(port: number, device: string | null = null, enableCo
       await ebb.executeMotion(motion);
     },
     async postCancel(): Promise<void> {
-      await ebb.setPenHeight(Device.Axidraw.penPctToPos(0), 1000);
+      await ebb.setPenUp();
     },
     async postPlot(): Promise<void> {
       await ebb.waitUntilMotorsIdle();
@@ -194,6 +195,7 @@ export function startServer(port: number, device: string | null = null, enableCo
 
   async function doPlot(plotter: Plotter, plan: Plan): Promise<void> {
     cancelRequested = false;
+    if (ebb) { ebb.cancelRequested = false; }
     unpaused = null;
     signalUnpause = null;
     motionIdx = 0;
