@@ -141,8 +141,10 @@ export class GRBL {
       const vMax = Math.max(block.vInitial, block.vFinal);
       if (vMax === 0) continue;
       const feedRate = Math.round(vMax * 60); // mm/s → mm/min
-      const x = block.p2.x.toFixed(3);
-      const y = block.p2.y.toFixed(3);
+      // GRBL X = machine vertical axis, GRBL Y = machine horizontal axis
+      // Saxi X = paper horizontal, Saxi Y = paper vertical → swap
+      const x = block.p2.y.toFixed(3);
+      const y = block.p2.x.toFixed(3);
       await this.command(`G1 X${x} Y${y} F${feedRate}`);
     }
   }
